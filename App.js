@@ -4,7 +4,7 @@ import { StyleSheet, View, Text, Dimensions, Alert } from 'react-native';
 import MapView, {
   ProviderPropType,
 } from 'react-native-maps';
-import MapEditablePolygon from './custom_modules/react-native-maps-draw/components/MapEditablePolygon'
+import MapEditablePolygon from './custom_modules/map-draw/MapEditablePolygon'
 
 const { width, height } = Dimensions.get('window');
 

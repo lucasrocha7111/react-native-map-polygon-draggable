@@ -13,7 +13,10 @@
     "react-dom": "^16.8.6",
     "react-native": "https://github.com/expo/react-native/archive/sdk-34.0.0.tar.gz",
     "react-native-maps": "~0.24.0",
-    "react-native-web": "^0.11.4"
+    "react-native-web": "^0.11.4",
+    "turf-center": "^3.0.12",
+    "turf-midpoint": "^3.0.12",
+    "turf-point": "^2.0.1"
   },
   "devDependencies": {
     "babel-preset-expo": "^6.0.0"
