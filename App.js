@@ -25,25 +25,8 @@ class App extends React.Component {
         longitude: LONGITUDE,
         latitudeDelta: LATITUDE_DELTA,
         longitudeDelta: LONGITUDE_DELTA,
-      },
-      draw: [
-        [{
-          latitude: LATITUDE + SPACE,
-          longitude: LONGITUDE + SPACE,
-        },
-        {
-          latitude: LATITUDE - SPACE,
-          longitude: LONGITUDE - SPACE,
-        },
-        {
-          latitude: LATITUDE - SPACE,
-          longitude: LONGITUDE + SPACE,
-        }]
-      ],
-      editing: false
+      }
     }
-
-    interval = null
   }
 
   render() {
@@ -89,10 +72,13 @@ class App extends React.Component {
     return (
       <View style={styles.container}>
         <MapView
-          provider={this.props.provider}
+          provider={'google'}
           style={styles.map}
           initialRegion={region}
-          scrollEnabled={!this.state.editing}
+          onMapReady={() => {
+
+          }}
+          //scrollEnabled={!this.state.editing}
         >
           <MapEditablePolygon 
             coordinates={pooly}
@@ -124,7 +110,6 @@ class App extends React.Component {
   }
 
 }
-
 
 App.propTypes = {
   provider: ProviderPropType,
