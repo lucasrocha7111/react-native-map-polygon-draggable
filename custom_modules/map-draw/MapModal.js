@@ -29,7 +29,7 @@ export class MapModal extends React.Component {
                 }}>
                 <View style={[{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.9)', justifyContent: 'center'}]}>
                     <View style={[{marginTop: 10, padding: 20}]}>
-                        <Text style={[{textAlign: 'center', color: 'white', fontSize: 18, fontWeight: 'bold'}]}>Editar vertice</Text>
+                        {/* <Text style={[{textAlign: 'center', color: 'white', fontSize: 18, fontWeight: 'bold'}]}>Editar vertice</Text> */}
 
                         <View style={[{marginTop: 30}]}>
                             <Text style={[{color: 'white'}]}>Latitude</Text>
