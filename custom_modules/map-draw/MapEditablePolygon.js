@@ -4,6 +4,7 @@ import MapView from 'react-native-maps';
 import geoUtils from './utils/geoUtils';
 import markerUtils from './utils/markerUtils';
 import deepClone from './utils/deepClone';
+import { MapModal } from './MapModal'
 
 const IS_ANDROID = Platform.OS === 'android';
 
@@ -17,6 +18,7 @@ class MapEditablePolygon extends React.Component {
       update: Date.now(),
       coordinates: this.props.coordinates || [],
     };
+
   }
 
   setNativeProps(props = {}) {
@@ -63,44 +65,48 @@ class MapEditablePolygon extends React.Component {
   }
 
   onVertexDragEnd(vertexPosition, coordinate) {
-    const coordCount = this.state.coordinates.length - 1;
+    try {
+      const coordCount = this.state.coordinates.length - 1;
 
-    var lowerPosition, upperPosition;
-    var lowerMidpointCoord, upperMidpointCoord;
+      var lowerPosition, upperPosition;
+      var lowerMidpointCoord, upperMidpointCoord;
 
-    if (vertexPosition === 0) {
-      // coords lower(N - 1), middle(0), upper(1)
-      lowerMidpointCoord = geoUtils.calculateMidpoint(this.state.coordinates[coordCount], coordinate);
-      upperMidpointCoord = geoUtils.calculateMidpoint(coordinate, this.state.coordinates[1]);
-      lowerPosition = coordCount;
-      upperPosition = 0;
-    } else if (vertexPosition === coordCount) {
-      // coords lower(N - 2), middle(N - 1), upper(0)
-      lowerMidpointCoord = geoUtils.calculateMidpoint(this.state.coordinates[coordCount - 1], coordinate);
-      upperMidpointCoord = geoUtils.calculateMidpoint(coordinate, this.state.coordinates[0]);
-      lowerPosition = coordCount - 1;
-      upperPosition = coordCount;
-    } else {
-      // coords lower(cur - 1), middle(cur), upper(cur + 1)
-      lowerMidpointCoord = geoUtils.calculateMidpoint(this.state.coordinates[vertexPosition - 1], coordinate);
-      upperMidpointCoord = geoUtils.calculateMidpoint(coordinate, this.state.coordinates[vertexPosition + 1]);
-      lowerPosition = vertexPosition - 1;
-      upperPosition = vertexPosition;
-    }
+      if (vertexPosition === 0) {
+        // coords lower(N - 1), middle(0), upper(1)
+        lowerMidpointCoord = geoUtils.calculateMidpoint(this.state.coordinates[coordCount], coordinate);
+        upperMidpointCoord = geoUtils.calculateMidpoint(coordinate, this.state.coordinates[1]);
+        lowerPosition = coordCount;
+        upperPosition = 0;
+      } else if (vertexPosition === coordCount) {
+        // coords lower(N - 2), middle(N - 1), upper(0)
+        lowerMidpointCoord = geoUtils.calculateMidpoint(this.state.coordinates[coordCount - 1], coordinate);
+        upperMidpointCoord = geoUtils.calculateMidpoint(coordinate, this.state.coordinates[0]);
+        lowerPosition = coordCount - 1;
+        upperPosition = coordCount;
+      } else {
+        // coords lower(cur - 1), middle(cur), upper(cur + 1)
+        lowerMidpointCoord = geoUtils.calculateMidpoint(this.state.coordinates[vertexPosition - 1], coordinate);
+        upperMidpointCoord = geoUtils.calculateMidpoint(coordinate, this.state.coordinates[vertexPosition + 1]);
+        lowerPosition = vertexPosition - 1;
+        upperPosition = vertexPosition;
+      }
 
-    this.state.midpointVertices[lowerPosition].setNativeProps({ coordinate: lowerMidpointCoord, opacity: 1 });
-    this.state.midpointVertices[upperPosition].setNativeProps({ coordinate: upperMidpointCoord, opacity: 1 });
+      this.state.midpointVertices[lowerPosition].setNativeProps({ coordinate: lowerMidpointCoord, opacity: 1 });
+      this.state.midpointVertices[upperPosition].setNativeProps({ coordinate: upperMidpointCoord, opacity: 1 });
 
-    const coords = this.getCoordinates();
-    coords.splice(vertexPosition, 1, coordinate);
+      const coords = this.getCoordinates();
+      coords.splice(vertexPosition, 1, coordinate);
 
-    // calculate new center
-    if (this.props.draggable) {
-      this.refs.center.setNativeProps({ coordinate: geoUtils.calculateOrigin(coords) });
-    }
+      // calculate new center
+      if (this.props.draggable) {
+        this.refs.center.setNativeProps({ coordinate: geoUtils.calculateOrigin(coords) });
+      }
 
-    if (this.props.onEditEnd) {
-      this.props.onEditEnd(vertexPosition, coords);
+      if (this.props.onEditEnd) {
+        this.props.onEditEnd(vertexPosition, coords);
+      }
+    } catch(err) {
+      console.log('onVertexDragEnd error', err)
     }
   }
 
@@ -208,7 +214,9 @@ class MapEditablePolygon extends React.Component {
           onDragStart={() => this.onVertexDragStart(vertexPosition)}
           onDrag={(e) => this.onVertexDrag(vertexPosition, e.nativeEvent.coordinate)}
           onDragEnd={(e) => this.onVertexDragEnd(vertexPosition, e.nativeEvent.coordinate)}
-          onPress={() => this.onVertexDelete(vertexPosition)}>
+          onPress={(e) => {
+            this.openPressToOpenModal(e, vertexPosition)
+          }}>
           <View ref={`vertex-${vertexPosition}`} style={style}>
               {this.props.renderVertex ? this.props.renderVertex() : null}
             </View>
@@ -217,6 +225,19 @@ class MapEditablePolygon extends React.Component {
     });
 
     return vertices;
+  }
+
+  openPressToOpenModal = (e, vertexPosition) => {
+    // this.onVertexDelete(vertexPosition)
+    let values = e.nativeEvent.coordinate
+    values.latitude = values.latitude.toString()
+    values.longitude = values.longitude.toString()
+    values['position'] = vertexPosition
+    if(this.props.modal !== null) {
+      this.props.modal.setState(values)
+      this.props.modal.openModal()
+      this.props.modal.onConfirm = this.modalAction
+    }
   }
 
   renderMidpointVertices() {
@@ -291,6 +312,62 @@ class MapEditablePolygon extends React.Component {
     return this.state.update !== nextState.update;
   }
 
+  modalAction = () => {
+    let values = this.props.modal.getValues()
+    let coordinates = {latitude: values.latitude, longitude: values.longitude}
+    let coord = {
+      latitude: Number(coordinates.latitude),
+      longitude: Number(coordinates.longitude)
+    }
+    let vertexPosition = values.position
+    this.onVertexDragStart(vertexPosition)
+    this.onVertexDrag(vertexPosition, coord)
+    setTimeout(() => {
+      let vertices = this.state.vertices.map((d, index) => {
+        let copy = {...d}
+        if(index === vertexPosition) {
+          const baseStyle = {
+            ...this.props.vertexSize,
+          }
+          const customStyle = this.props.vertexStyle || {
+            borderRadius: this.props.vertexSize.width,
+            backgroundColor: 'black',
+            borderWidth: 3,
+            borderColor: 'white',
+          };
+    
+          const style = [baseStyle, customStyle]
+          copy = <MapView.Marker
+            draggable
+            ref={ref => { this.state.vertices[vertexPosition] = ref; }}
+            key={`${this.props.id}-vertex-${vertexPosition}`}
+            coordinate={coord}
+            centerOffset={this.getCenterOffsetFromAnchor(this.props.vertexAnchor, this.props.vertexSize)}
+            anchor={this.props.vertexAnchor}
+            zIndex={this.props.zIndex + 1}
+            onDragStart={() => this.onVertexDragStart(vertexPosition)}
+            onDrag={(e) => this.onVertexDrag(vertexPosition, e.nativeEvent.coordinate)}
+            onDragEnd={(e) => this.onVertexDragEnd(vertexPosition, e.nativeEvent.coordinate)}
+            onPress={(e) => {
+              this.openPressToOpenModal(e, vertexPosition)
+            }}>
+            <View ref={`vertex-${vertexPosition}`} style={style}>
+                {this.props.renderVertex ? this.props.renderVertex() : null}
+              </View>
+          </MapView.Marker>
+        }
+        return copy
+      })
+      this.setState({
+        vertices: vertices
+      })
+
+      setTimeout(() => {
+        this.forceUpdate()
+      }, 50)
+    }, 50)
+  }
+
   render() {
     return (
       <View key={this.state.update}>
@@ -301,7 +378,7 @@ class MapEditablePolygon extends React.Component {
           coordinates={this.state.coordinates}
           {...this.props.shapeStyle} />
 
-        {this.renderVertices()}
+        {this.renderVertices(this.state.coordinates)}
         {this.renderMidpointVertices()}
         {this.renderDragIcon()}
       </View>

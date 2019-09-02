@@ -5,6 +5,7 @@ import MapView, {
   ProviderPropType,
 } from 'react-native-maps';
 import MapEditablePolygon from './custom_modules/map-draw/MapEditablePolygon'
+import { MapModal } from './custom_modules/map-draw/MapModal'
 
 const { width, height } = Dimensions.get('window');
 
@@ -27,6 +28,8 @@ class App extends React.Component {
         longitudeDelta: LONGITUDE_DELTA,
       }
     }
+
+    this.modal = null
   }
 
   render() {
@@ -71,6 +74,9 @@ class App extends React.Component {
     }]
     return (
       <View style={styles.container}>
+        <MapModal 
+          ref={(c) => this.modal = c}
+        />
         <MapView
           provider={'google'}
           style={styles.map}
@@ -86,6 +92,7 @@ class App extends React.Component {
             strokeColor="rgba(0,0,0,0.5)"
             strokeWidth={4}
             tappable={true}
+            modal={this.modal}
           />
 
           <MapEditablePolygon 
@@ -107,6 +114,12 @@ class App extends React.Component {
         </MapView>
       </View>
     );
+  }
+
+  componentDidMount = () => {
+    setTimeout(() => {
+      this.forceUpdate()
+    }, 100)
   }
 
 }
