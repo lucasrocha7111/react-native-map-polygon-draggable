@@ -16,6 +16,8 @@ export class MapModal extends React.Component {
       longitude: '',
       position: null
     }
+
+    onConfirm = null
   
     render() {
       return (
@@ -61,8 +63,8 @@ export class MapModal extends React.Component {
                             onPress={() => {
                                 try {
                                     this.closeModal()
-                                    if(typeof this.props.onConfirm !== 'undefined') {
-                                        this.props.onConfirm()
+                                    if(typeof this.onConfirm !== 'undefined' && this.onConfirm !== null) {
+                                        this.onConfirm()
                                     }
                                 } catch(err) {
 
