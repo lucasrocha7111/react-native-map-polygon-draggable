@@ -34,15 +34,7 @@ class App extends React.Component {
     return (
       <View style={styles.container}>
         <GoogleMapsApp />
-        <View style={[{position: 'absolute', bottom: 10}]}>
-          <TouchableOpacity 
-            onPress={() => {
-
-            }}
-            style={[{borderRadius: 10, backgroundColor: 'rgba(255, 255, 255, 0.6)', paddingHorizontal: 30, paddingVertical: 10}]}>
-            <Text style={[{padding: 4}]}>Mudar de mapa</Text>
-          </TouchableOpacity>
-        </View>
+        
       </View>
     );
   }
