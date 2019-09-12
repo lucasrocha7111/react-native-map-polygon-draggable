@@ -1,8 +1,9 @@
 import React from 'react'
-import { StyleSheet, View, Dimensions } from 'react-native';
+import { StyleSheet, View, Dimensions, Platform, TouchableOpacity, Text } from 'react-native';
 
 import MapView, {
     ProviderPropType,
+    UrlTile
 } from 'react-native-maps';
 import MapEditablePolygon from '../custom_modules/map-draw/MapEditablePolygon'
 import { MapModal } from '../custom_modules/map-draw/MapModal'
@@ -28,7 +29,9 @@ export class GoogleMapsApp extends React.Component {
             latitudeDelta: LATITUDE_DELTA,
             longitudeDelta: LONGITUDE_DELTA,
           },
-          mapSelected: 'google'
+          mapSelected: 'google',
+          onlineTile: null,
+          showOnlineTile: false
         }
     
         this.modal = null
@@ -82,12 +85,34 @@ export class GoogleMapsApp extends React.Component {
                 <MapView
                     provider={'google'}
                     style={styles.map}
+                    mapType={Platform.OS == "android" ? "none" : "standard"}
                     initialRegion={region}
                     onMapReady={() => {
 
                     }}
                     //scrollEnabled={!this.state.editing}
-                >
+                >  
+                    {this.state.onlineTile !== null && this.state.showOnlineTile
+                    ? <UrlTile
+                        /**
+                         * The url template of the tile server. The patterns {x} {y} {z} will be replaced at runtime
+                         * For example, http://c.tile.openstreetmap.org/{z}/{x}/{y}.png
+                         * https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}
+                         */
+                        urlTemplate={this.state.onlineTile}
+                        /**
+                         * The maximum zoom level for this tile overlay. Corresponds to the maximumZ setting in
+                         * MKTileOverlay. iOS only.
+                         */
+                        maximumZ={19}
+                        /**
+                         * flipY allows tiles with inverted y coordinates (origin at bottom left of map)
+                         * to be used. Its default value is false.
+                         */
+                        flipY={false}
+                    />
+                    : null
+                    }
                     <MapEditablePolygon 
                         coordinates={pooly}
                         fillColor="rgba(0, 200, 0, 0.5)"
@@ -113,6 +138,38 @@ export class GoogleMapsApp extends React.Component {
                         tappable={true}
                     />
                 </MapView>
+                <View style={[{position: 'absolute', bottom: 30, flexDirection: 'row', flex: 1}]}>
+                    <TouchableOpacity 
+                        onPress={() => {
+                            this.setState({
+                                onlineTile: 'http://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                showOnlineTile: false
+                            })
+                            setTimeout(() => {
+                                this.setState({
+                                    showOnlineTile: true
+                                })
+                            }, 10)
+                        }}
+                        style={[{borderRadius: 10, backgroundColor: 'rgba(0, 0, 0, 0.7)', flex: 1, paddingHorizontal: 10, paddingVertical: 10}]}>
+                        <Text style={[{padding: 4, color: '#fff', textAlign: 'center'}]}>OpenMaps</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                        onPress={() => {
+                            this.setState({
+                                onlineTile: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+                                showOnlineTile: false
+                            })
+                            setTimeout(() => {
+                                this.setState({
+                                    showOnlineTile: true
+                                })
+                            }, 10)
+                        }}
+                        style={[{borderRadius: 10, backgroundColor: 'rgba(0, 0, 0, 0.7)', flex: 1, paddingHorizontal: 10, paddingVertical: 10}]}>
+                        <Text style={[{padding: 4, color: '#fff', textAlign: 'center'}]}>ArcGIS</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
             
         )
