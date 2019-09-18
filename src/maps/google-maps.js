@@ -2,7 +2,6 @@ import React from 'react'
 import { StyleSheet, View, Dimensions, Platform, TouchableOpacity, Text } from 'react-native';
 
 import MapView, {
-    ProviderPropType,
     UrlTile
 } from 'react-native-maps';
 import MapEditablePolygon from '../custom_modules/map-draw/MapEditablePolygon'
@@ -90,25 +89,17 @@ export class GoogleMapsApp extends React.Component {
                     onMapReady={() => {
 
                     }}
-                    //scrollEnabled={!this.state.editing}
                 >  
                     {this.state.onlineTile !== null && this.state.showOnlineTile
                     ? <UrlTile
                         /**
                          * The url template of the tile server. The patterns {x} {y} {z} will be replaced at runtime
-                         * For example, http://c.tile.openstreetmap.org/{z}/{x}/{y}.png
+                         * For example: 
+                         * http://c.tile.openstreetmap.org/{z}/{x}/{y}.png
                          * https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}
                          */
                         urlTemplate={this.state.onlineTile}
-                        /**
-                         * The maximum zoom level for this tile overlay. Corresponds to the maximumZ setting in
-                         * MKTileOverlay. iOS only.
-                         */
                         maximumZ={19}
-                        /**
-                         * flipY allows tiles with inverted y coordinates (origin at bottom left of map)
-                         * to be used. Its default value is false.
-                         */
                         flipY={false}
                     />
                     : null
@@ -179,7 +170,6 @@ export class GoogleMapsApp extends React.Component {
   
 const styles = StyleSheet.create({
     map: {
-        //...StyleSheet.absoluteFillObject,
         flex: 1,
         minWidth: width,
         minHeight: height
