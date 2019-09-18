@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Notorium",
-    "slug": "app-notorium",
+    "name": "App Map Draggable",
+    "slug": "app-map-draggable",
     "privacy": "public",
     "sdkVersion": "34.0.0",
     "platforms": [
@@ -25,10 +25,10 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "br.com.notoriun"
+      "bundleIdentifier": "br.com.draggable"
     },
     "android": {
-      "package": "br.com.notoriun",
+      "package": "br.com.draggable",
       "permissions": [
         "LOCATION",
         "ACCESS_COARSE_LOCATION",
